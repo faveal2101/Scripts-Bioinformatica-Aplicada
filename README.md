@@ -89,9 +89,11 @@ trim_galore --paired --clip_R1 5 MP4_MERGED_val_1.fq.gz --clip_R2 10 MP4_MERGED_
 
 ## 3. Usar SPAdes
 Una vez obtenidas las secuencias limpias y validadas (_val_1.fq.gz y _val_2.fq.gz), se utiliza SPAdes para realizar el ensamblaje genómico de novo.
-Ensamblaje estándar:
-Se configura el encabezado #SBATCH para la partición "dribe-long" y se cargan con "module load" el ensamblador "SPAdes/3.15.4", el entorno "miniconda/3" y las herramientas de alineamiento y manejo de secuencias "samtools/1.16" y "bwa/0.7.17".
-En la línea de comando, "spades.py" inicia el ensamblador. "-1" y "-2" indican las rutas de los archivos de lecturas forward y reverse ya recortados por TrimGalore. "--cov-cutoff auto" le indica al algoritmo que calcule y aplique automáticamente un umbral de cobertura para descartar contigs de muy baja cobertura o ruido. "-o Spades_trimm" define el nombre de la carpeta donde se guardarán los resultados del ensamblaje. "-k 89,95,97,101,107,117,127" establece la lista de tamaños de fragmentos (k-mers) que el programa utilizará iterativamente para construir los grafos de ensamblaje. Finalmente, "-t 20" asigna 20 hilos de procesamiento (threads) para acelerar el cálculo:
+#### Ensamblaje estándar:
+Se configura el encabezado #SBATCH para la partición "`dribe-long`" y se cargan con "`module load`" el ensamblador "`SPAdes/3.15.4`", el entorno "`miniconda/3`" y las herramientas de alineamiento y manejo de secuencias "`samtools/1.16`" y "`bwa/0.7.17`".
+
+En la línea de comando, "`spades.py`" inicia el ensamblador. "`-1`" y "`-2`" indican las rutas de los archivos de lecturas forward y reverse ya recortados por TrimGalore. "`--cov-cutoff auto`" le indica al algoritmo que calcule y aplique automáticamente un umbral de cobertura para descartar contigs de muy baja cobertura o ruido. "`-o Spades_trimm`" define el nombre de la carpeta donde se guardarán los resultados del ensamblaje. "`-k 89,95,97,101,107,117,127`" establece la lista de tamaños de fragmentos (k-mers) que el programa utilizará iterativamente para construir los grafos de ensamblaje. Finalmente, "`-t 20`" asigna 20 hilos de procesamiento (threads) para acelerar el cálculo:
+
 #!/bin/bash
 #SBATCH --job-name=spades
 #SBATCH --output=spades
@@ -106,8 +108,9 @@ module load bwa/0.7.17
 
 spades.py -1 FASTQC/MA9A_merged_1_val_1.fq.gz -2 FASTQC/MA9A_merged_2_val_2.fq.gz --cov-cutoff auto -o Spades_trimm -k 89,95,97,101,107,117,127 -t 20
 
-Ensamblaje en Modo Careful:
-En este segundo bloque se ejecuta exactamente el mismo flujo de SPAdes, pero añadiendo la bandera "--careful" y guardando los resultados en la carpeta "-o Spa_care". El parámetro "--careful" activa algoritmos internos de corrección para minimizar el número de desajustes (mismatches) e inserciones/deleciones cortas (indels) durante el ensamblaje:
+#### Ensamblaje en Modo Careful:
+En este segundo bloque se ejecuta exactamente el mismo flujo de SPAdes, pero añadiendo la bandera "`--careful`" y guardando los resultados en la carpeta "`-o Spa_care`". El parámetro "`--careful`" activa algoritmos internos de corrección para minimizar el número de desajustes (mismatches) e inserciones/deleciones cortas (indels) durante el ensamblaje:
+
 #!/bin/bash
 #SBATCH --job-name=spades
 #SBATCH --output=spa
@@ -126,11 +129,13 @@ spades.py -1 MA9A_merged_1_val_1.fq.gz -2 MA9A_merged_2_val_2.fq.gz --careful --
 ---
 
 ## 4. Usar MeDuSa
-> ⚠️ Nota condicional: MeDuSa se debe utilizar únicamente en caso de que exista un genoma de referencia cercano y la muestra ya haya sido previamente identificada mediante marcador molecular o prueba de ITS.
+> Nota condicional: MeDuSa se debe utilizar únicamente en caso de que exista un genoma de referencia cercano y la muestra ya haya sido previamente identificada mediante marcador molecular o prueba de ITS.
 > 
-Andamiaje (Scaffolding) basado en referencias:
-En este bloque se solicita la partición "kura-long" con un tiempo de "100:00". La línea ". /opt/Modules/3.2.10/init/sh" inicializa el sistema de módulos dentro de los nodos de la partición kura, permitiendo cargar "miniconda/medusa" y el alineador genómico "mummer/4.0.0beta2".
-En el comando principal, "java -jar /opt/python/miniconda3/envs/medusa/share/medusa-1.6-2/medusa.jar" ejecuta el archivo empaquetado de MeDuSa mediante Java. "-f Medusa" indica el nombre de la carpeta donde se almacenaron previamente los genomas de referencia cercanos. "-i /work/tarias/MA15/FASTQC1/Spades2/contigs.fasta" especifica la ruta del archivo de entrada que contiene los contigs generados por SPAdes. "-o MA15_medusaQC" define el nombre del archivo de salida con los scaffolds optimizados. "-v" (verbose) solicita que el programa imprima detalles del progreso en pantalla, y "-scriptPath /work/tarias/medusa_scripts" indica la ruta de la carpeta que contiene los scripts auxiliares necesarios para que MeDuSa funcione:
+#### Andamiaje (Scaffolding) basado en referencias:
+En este bloque se solicita la partición "`kura-long`" con un tiempo de "`100:00`". La línea "`. /opt/Modules/3.2.10/init/sh`" inicializa el sistema de módulos dentro de los nodos de la partición kura, permitiendo cargar "`miniconda/medusa`" y el alineador genómico "`mummer/4.0.0beta2`".
+
+En el comando principal, "`java -jar /opt/python/miniconda3/envs/medusa/share/medusa-1.6-2/medusa.jar`" ejecuta el archivo empaquetado de MeDuSa mediante Java. "`-f Medusa`" indica el nombre de la carpeta donde se almacenaron previamente los genomas de referencia cercanos. "`-i /work/tarias/MA15/FASTQC1/Spades2/contigs.fasta`" especifica la ruta del archivo de entrada que contiene los contigs generados por SPAdes. "`-o MA15_medusaQC`" define el nombre del archivo de salida con los scaffolds optimizados. "`-v`" (verbose) solicita que el programa imprima detalles del progreso en pantalla, y "`-scriptPath /work/tarias/medusa_scripts`" indica la ruta de la carpeta que contiene los scripts auxiliares necesarios para que MeDuSa funcione:
+
 #!/bin/bash
 #SBATCH --job-name=medusa
 #SBATCH --output=medusa.txt
@@ -149,9 +154,10 @@ java -jar /opt/python/miniconda3/envs/medusa/share/medusa-1.6-2/medusa.jar -f Me
 
 ## 5. Ejecutar BUSCO
 BUSCO permite evaluar qué tan completo quedó nuestro ensamblaje genómico comparándolo contra bases de datos de genes ortólogos universales de copia única.
-Evaluación del genoma ensamblado:
-Tras configurar SLURM en la partición "kura-long", inicializar el entorno de módulos y cargar "miniconda/busco", se ejecutan tres análisis consecutivos a diferentes niveles taxonómicos.
-En cada línea, "busco" inicia el programa. "-f" (force) obliga a sobrescribir archivos previos si llevan el mismo nombre de salida. "-m genome" le indica a BUSCO que el archivo que va a evaluar es un ensamblaje de ADN genómico completo. "-i Spades/contigs.fasta" señala el archivo FASTA de entrada generado por el ensamblador. "-l" define la base de datos de linaje evolutivo contra la cual se comparará el genoma (en este caso se prueba desde lo más general hasta lo más específico: "fungi_odb10", "ascomycota_odb10" e "hypocreales_odb10", pudiendo cambiarse por bases como Eurotiales según el hongo en estudio). "-c 8" asigna 8 núcleos de CPU al proceso, y "-o" define el nombre del directorio donde se guardarán los resultados de cada corrida ("BuscoFungi", "BuscoASCO" y "BuscoHYPO"):
+#### Evaluación del genoma ensamblado:
+Tras configurar SLURM en la partición "`kura-long`", inicializar el entorno de módulos y cargar "`miniconda/busco`", se ejecutan tres análisis consecutivos a diferentes niveles taxonómicos.
+En cada línea, "`busco`" inicia el programa. "`-f`" (force) obliga a sobrescribir archivos previos si llevan el mismo nombre de salida. "`-m genome`" le indica a BUSCO que el archivo que va a evaluar es un ensamblaje de ADN genómico completo. "`-i Spades/contigs.fasta`" señala el archivo FASTA de entrada generado por el ensamblador. "`-l`" define la base de datos de linaje evolutivo contra la cual se comparará el genoma (en este caso se prueba desde lo más general hasta lo más específico: "`fungi_odb10`", "`ascomycota_odb10`" e "`hypocreales_odb10`", pudiendo cambiarse por bases como Eurotiales según el hongo en estudio). "`-c 8`" asigna 8 núcleos de CPU al proceso, y "`-o`" define el nombre del directorio donde se guardarán los resultados de cada corrida ("`BuscoFungi`", "`BuscoASCO`" y "`BuscoHYPO`"):
+
 #!/bin/bash
 #SBATCH --job-name=BUSCO
 #SBATCH --output=busco.txt
