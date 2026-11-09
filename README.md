@@ -26,7 +26,7 @@ A lo largo de este flujo de trabajo se manejan los siguientes formatos estándar
  * .aa / .codingseq: Archivos derivados de la predicción génica que contienen las secuencias traducidas de aminoácidos (proteínas) y las secuencias codificantes de nucleótidos, respectivamente.
  * .paf (Pairwise mApping Format): Archivo de coordenadas de alineamiento entre dos genomas utilizado para generar gráficos de comparación estructural (dotplots).
 
-El script principal está seccionado y ordenado para comprender fácilmente el propósito de cada herramienta. Está conformado por las siguientes secciones, las cuales se explican línea por línea a continuación: "1. Proceso de Ensamblaje de Genoma", "2. Ejecutar TrimGalore", "3. Usar SPAdes", "4. Usar MeDuSa", "5. Ejecutar BUSCO", "6. Ejecutar Augustus", "7. Ejecutar Structural" y "8. Realizar Comprobación".
+> El script principal está seccionado y ordenado para comprender fácilmente el propósito de cada herramienta. Está conformado por las siguientes secciones, las cuales se explican línea por línea a continuación: "1. Proceso de Ensamblaje de Genoma", "2. Ejecutar TrimGalore", "3. Usar SPAdes", "4. Usar MeDuSa", "5. Ejecutar BUSCO", "6. Ejecutar Augustus", "7. Ejecutar Structural" y "8. Realizar Comprobación".
 ## 1. Proceso de Ensamblaje de Genoma
 Antes de iniciar el control de calidad, si el centro de secuenciación entregó las lecturas divididas en diferentes carriles (lanes, por ejemplo L1 y L2), es necesario unirlas en un único archivo para las lecturas forward (_1) y otro para las lecturas reverse (_2).
 Unir los archivos de lecturas:
