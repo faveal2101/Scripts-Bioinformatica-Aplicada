@@ -1,8 +1,8 @@
 # LABAP_Assembly (Ensamblaje y Anotación de Genomas)
 
 ## Breve introducción
-Este repositorio contiene un flujo de trabajo (pipeline) bioinformático estandarizado diseñado para el ensamblaje de novo, predicción estructural y anotación funcional de genomas eucariotas (específicamente hongos) a partir de datos de secuenciación masiva. En este flujo de trabajo se utilizan entornos de computación de alto rendimiento (HPC), como el supercomputador Kabré, para transformar lecturas de ADN crudas en secuencias genómicas ensambladas y biológicamente descritas. > Es necesario recalcar que se emplea el gestor de tareas SLURM para la correcta ejecución de cada etapa del proceso.
-
+Este repositorio contiene un flujo de trabajo (pipeline) bioinformático estandarizado diseñado para el ensamblaje de novo, predicción estructural y anotación funcional de genomas eucariotas (específicamente hongos) a partir de datos de secuenciación masiva. En este flujo de trabajo se utilizan entornos de computación de alto rendimiento (HPC), como el supercomputador Kabré, para transformar lecturas de ADN crudas en secuencias genómicas ensambladas y biológicamente descritas. 
+> Nota: Es necesario recalcar que se emplea el gestor de tareas SLURM para la correcta ejecución de cada etapa del proceso.
 ---
 
 #### ¿Cómo funciona este flujo de trabajo y qué herramientas integra?
@@ -18,13 +18,14 @@ A diferencia de plataformas cerradas de un solo entorno, este pipeline encadena 
    * Augustus: Predice las coordenadas estructurales de los genes codificantes y extrae sus secuencias de proteínas y CDS.
    * eggNOG-mapper, barrnap y tRNAscan-SE: Realizan la anotación funcional de proteínas y la identificación de ARN ribosomal (ARNr) y ARN de transferencia (ARNt).
    * minimap2 y R (ggplot2): Permiten comprobar la sintenia genómica mediante dotplots y graficar las estadísticas de anotación.
-📁 Formatos de archivo clave
+#### Formatos de archivo clave
 A lo largo de este flujo de trabajo se manejan los siguientes formatos estándar:
  * .fq.gz (FASTQ comprimido): Contiene las lecturas crudas o limpias de ADN junto con sus puntajes de calidad por nucleótido.
  * .fasta: Formato de texto que almacena secuencias nucleotídicas ensambladas (contigs, scaffolds o secuencias de ARNr).
  * .gff3 (General Feature Format): Archivo tabular que guarda las coordenadas exactas de los elementos predichos en el genoma (exones, intrones, CDS, ARNr).
  * .aa / .codingseq: Archivos derivados de la predicción génica que contienen las secuencias traducidas de aminoácidos (proteínas) y las secuencias codificantes de nucleótidos, respectivamente.
  * .paf (Pairwise mApping Format): Archivo de coordenadas de alineamiento entre dos genomas utilizado para generar gráficos de comparación estructural (dotplots).
+
 El script principal está seccionado y ordenado para comprender fácilmente el propósito de cada herramienta. Está conformado por las siguientes secciones, las cuales se explican línea por línea a continuación: "1. Proceso de Ensamblaje de Genoma", "2. Ejecutar TrimGalore", "3. Usar SPAdes", "4. Usar MeDuSa", "5. Ejecutar BUSCO", "6. Ejecutar Augustus", "7. Ejecutar Structural" y "8. Realizar Comprobación".
 ## 1. Proceso de Ensamblaje de Genoma
 Antes de iniciar el control de calidad, si el centro de secuenciación entregó las lecturas divididas en diferentes carriles (lanes, por ejemplo L1 y L2), es necesario unirlas en un único archivo para las lecturas forward (_1) y otro para las lecturas reverse (_2).
