@@ -8,23 +8,23 @@ Este repositorio contiene un flujo de trabajo (pipeline) bioinformático estanda
 #### ¿Cómo funciona este flujo de trabajo y qué herramientas integra?
 A diferencia de plataformas cerradas de un solo entorno, este pipeline encadena múltiples herramientas bioinformáticas especializadas mediante módulos del clúster:
  * Preprocesamiento y Control de Calidad:
-   * cat: Concatena archivos de lecturas provenientes de distintos carriles (lanes) de secuenciación.
-   * TrimGalore / FastQC / cutadapt: Evalúan la calidad de las secuencias y recortan adaptadores o extremos con baja calidad.
+   * `cat`: Concatena archivos de lecturas provenientes de distintos carriles (lanes) de secuenciación.
+   * `TrimGalore / FastQC / cutadapt`: Evalúan la calidad de las secuencias y recortan adaptadores o extremos con baja calidad.
  * Ensamblaje y Andamiaje (Scaffolding):
-   * SPAdes: Ejecuta el ensamblaje de novo a partir de lecturas cortas utilizando múltiples tamaños de k-mers.
-   * MeDuSa: Ordena y orienta los contigs en scaffolds utilizando genomas de referencia cercanos.
+   * `SPAdes`: Ejecuta el ensamblaje de novo a partir de lecturas cortas utilizando múltiples tamaños de k-mers.
+   * `MeDuSa`: Ordena y orienta los contigs en scaffolds utilizando genomas de referencia cercanos.
  * Evaluación y Anotación Genómica:
-   * BUSCO: Evalúa la completitud del genoma o proteoma buscando genes ortólogos universales de copia única.
-   * Augustus: Predice las coordenadas estructurales de los genes codificantes y extrae sus secuencias de proteínas y CDS.
-   * eggNOG-mapper, barrnap y tRNAscan-SE: Realizan la anotación funcional de proteínas y la identificación de ARN ribosomal (ARNr) y ARN de transferencia (ARNt).
-   * minimap2 y R (ggplot2): Permiten comprobar la sintenia genómica mediante dotplots y graficar las estadísticas de anotación.
+   * `BUSCO`: Evalúa la completitud del genoma o proteoma buscando genes ortólogos universales de copia única.
+   * `Augustus`: Predice las coordenadas estructurales de los genes codificantes y extrae sus secuencias de proteínas y CDS.
+   * `eggNOG-mapper, barrnap y tRNAscan-SE`: Realizan la anotación funcional de proteínas y la identificación de ARN ribosomal (ARNr) y ARN de transferencia (ARNt).
+   * `minimap2 y R (ggplot2)`: Permiten comprobar la sintenia genómica mediante dotplots y graficar las estadísticas de anotación.
 #### Formatos de archivo clave
 A lo largo de este flujo de trabajo se manejan los siguientes formatos estándar:
- * .fq.gz (FASTQ comprimido): Contiene las lecturas crudas o limpias de ADN junto con sus puntajes de calidad por nucleótido.
- * .fasta: Formato de texto que almacena secuencias nucleotídicas ensambladas (contigs, scaffolds o secuencias de ARNr).
- * .gff3 (General Feature Format): Archivo tabular que guarda las coordenadas exactas de los elementos predichos en el genoma (exones, intrones, CDS, ARNr).
- * .aa / .codingseq: Archivos derivados de la predicción génica que contienen las secuencias traducidas de aminoácidos (proteínas) y las secuencias codificantes de nucleótidos, respectivamente.
- * .paf (Pairwise mApping Format): Archivo de coordenadas de alineamiento entre dos genomas utilizado para generar gráficos de comparación estructural (dotplots).
+ * `.fq.gz (FASTQ comprimido)`: Contiene las lecturas crudas o limpias de ADN junto con sus puntajes de calidad por nucleótido.
+ * `.fasta`: Formato de texto que almacena secuencias nucleotídicas ensambladas (contigs, scaffolds o secuencias de ARNr).
+ * `.gff3 (General Feature Format)`: Archivo tabular que guarda las coordenadas exactas de los elementos predichos en el genoma (exones, intrones, CDS, ARNr).
+ * `.aa / .codingseq`: Archivos derivados de la predicción génica que contienen las secuencias traducidas de aminoácidos (proteínas) y las secuencias codificantes de nucleótidos, respectivamente.
+ * `.paf (Pairwise mApping Format)`: Archivo de coordenadas de alineamiento entre dos genomas utilizado para generar gráficos de comparación estructural (dotplots).
 
 > El script principal está seccionado y ordenado para comprender fácilmente el propósito de cada herramienta. Está conformado por las siguientes secciones, las cuales se explican línea por línea a continuación: "1. Proceso de Ensamblaje de Genoma", "2. Ejecutar TrimGalore", "3. Usar SPAdes", "4. Usar MeDuSa", "5. Ejecutar BUSCO", "6. Ejecutar Augustus", "7. Ejecutar Structural" y "8. Realizar Comprobación".
 ## 1. Proceso de Ensamblaje de Genoma
