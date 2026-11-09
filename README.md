@@ -177,10 +177,13 @@ busco -f -m genome -i Spades/contigs.fasta -l hypocreales_odb10 -c 8 -o BuscoHYP
 
 ## 6. Ejecutar Augustus
 En esta etapa se utiliza Augustus para predecir la estructura de los genes codificantes dentro de los scaffolds ensamblados, utilizando modelos estadísticos de especies fúngicas cercanas disponibles en la lista del programa.
-Predicción estructural de genes y extracción de secuencias:
-Se configura el trabajo en SLURM y se cargan las dependencias del sistema junto con "augustus/3.3" y "perl/5.34.0".
-En el primer bloque de comandos, "augustus Spades/scaffolds.fasta" ejecuta el predictor sobre el archivo de scaffolds. "--strand=both" indica que busque genes en ambas hebras del ADN (forward y reverse). "--stopCodonExcludedFromCDS=false" especifica que el codón de parada (stop codon) debe incluirse dentro de la secuencia codificante (CDS). "--codingseq=on" y "--protein=on" ordenan al programa que escriba las secuencias nucleotídicas codificantes y las secuencias de aminoácidos traducidas dentro de los comentarios del archivo de salida. "--genemodel=complete" restringe la predicción únicamente a genes completos (con codón de inicio y de parada). "--gff3=on" establece que el formato de salida sea GFF3. "--species=..." indica el organismo modelo cercano cuyos parámetros de entrenamiento se usarán (aquí se prueban tres especies: "aspergillus_fumigatus", "aspergillus_nidulans" y "aspergillus_oryzae"). Finalmente, "> MP4_afum.gff3" guarda las coordenadas y predicciones en un archivo .gff3 para cada especie.
-En el segundo bloque, se utiliza el intérprete "perl" para correr el script auxiliar "/opt/tools/augustus-3.3/scripts/getAnnoFasta.pl" sobre cada archivo .gff3 generado. Al acompañarlo de "--protein=on" y "--codingseq=on", este script extrae las secuencias que estaban incrustadas dentro del archivo .gff3 y crea archivos FASTA independientes con las proteínas (.aa) y las secuencias codificantes (.codingseq):
+#### Predicción estructural de genes y extracción de secuencias:
+Se configura el trabajo en SLURM y se cargan las dependencias del sistema junto con "`augustus/3.3`" y "`perl/5.34.0`".
+
+En el primer bloque de comandos, "`augustus Spades/scaffolds.fasta`" ejecuta el predictor sobre el archivo de scaffolds. "`--strand=both`" indica que busque genes en ambas hebras del ADN (forward y reverse). "`--stopCodonExcludedFromCDS=false`" especifica que el codón de parada (stop codon) debe incluirse dentro de la secuencia codificante (CDS). "`--codingseq=on`" y "`--protein=on`" ordenan al programa que escriba las secuencias nucleotídicas codificantes y las secuencias de aminoácidos traducidas dentro de los comentarios del archivo de salida. "`--genemodel=complete`" restringe la predicción únicamente a genes completos (con codón de inicio y de parada). "`--gff3=on`" establece que el formato de salida sea GFF3. "`--species=...`" indica el organismo modelo cercano cuyos parámetros de entrenamiento se usarán (aquí se prueban tres especies: "`aspergillus_fumigatus`", "`aspergillus_nidulans`" y "`aspergillus_oryzae`"). Finalmente, "`> MP4_afum.gff3`" guarda las coordenadas y predicciones en un archivo .gff3 para cada especie.
+
+En el segundo bloque, se utiliza el intérprete "`perl`" para correr el script auxiliar "`/opt/tools/augustus-3.3/scripts/getAnnoFasta.pl`" sobre cada archivo .gff3 generado. Al acompañarlo de "`--protein=on`" y "`--codingseq=on`", este script extrae las secuencias que estaban incrustadas dentro del archivo .gff3 y crea archivos FASTA independientes con las proteínas (.aa) y las secuencias codificantes (.codingseq):
+
 #!/bin/bash
 #SBATCH --job-name=augustus
 #SBATCH --output=augustus_MP4.txt
@@ -216,8 +219,9 @@ perl /opt/tools/augustus-3.3/scripts/getAnnoFasta.pl MP4_ory.gff3 --protein=on -
 
 ## 7. Ejecutar Structural (Anotación Funcional y ARN no codificante)
 En esta sección final del flujo principal se anotan funcionalmente las proteínas predichas, se identifican los genes de ARN no codificante (ARNr y ARNt) y se contabilizan las enzimas activas en carbohidratos (CAZymes).
-Configuración y carga de módulos:
-Se define el trabajo en SLURM sobre la partición "kura-long" con un tiempo límite de "168:00:00". Se inicializa el entorno de módulos y se cargan "miniconda/3", "miniconda/eggnog-mapper-2.1.6", "miniconda/barrnap", "tRNAscan-SE/2.0.5" y "perl/5.34.0":
+#### Configuración y carga de módulos:
+Se define el trabajo en SLURM sobre la partición "`kura-long`" con un tiempo límite de "`168:00:00`". Se inicializa el entorno de módulos y se cargan "`miniconda/3`", "`miniconda/eggnog-mapper-2.1.6`", "`miniconda/barrnap`", "`tRNAscan-SE/2.0.5`" y "`perl/5.34.0`":
+
 #!/bin/bash
 #SBATCH --job-name=structural
 #SBATCH --output=structural_manuscript.txt
@@ -233,25 +237,29 @@ module load miniconda/barrnap
 module load tRNAscan-SE/2.0.5
 module load perl/5.34.0
 
-Anotación funcional con eggNOG-mapper:
-El comando "emapper.py" ejecuta eggNOG-mapper. "-i Augustus/Polished_canu_HortaeMedusa_neurospora3.aa" ingresa el archivo FASTA con las secuencias de proteínas obtenidas de Augustus. "-o eggmapper_out" define el prefijo de los archivos de salida. "--itype proteins" especifica que los datos de entrada son secuencias de aminoácidos. "--excel" genera adicionalmente el reporte de anotación en una hoja de cálculo .xlsx. "-m diamond" indica que se utilice el algoritmo DIAMOND para realizar la búsqueda rápida de homología. "--query_cover 50" exige que el alineamiento cubra como mínimo el 50% de la secuencia consultada. "--evalue 1e-5" establece el umbral estadístico de valor E máximo aceptado. "--report_orthologs" solicita que se incluya la lista detallada de genes ortólogos detectados. "--go_evidence all" incluye todos los códigos de evidencia de Ontología Génica (GO), y "--cpu 10" asigna 10 núcleos de procesamiento:
+#### Anotación funcional con eggNOG-mapper:
+El comando "`emapper.py`" ejecuta eggNOG-mapper. "`-i Augustus/Polished_canu_HortaeMedusa_neurospora3.aa`" ingresa el archivo FASTA con las secuencias de proteínas obtenidas de Augustus. "`-o eggmapper_out`" define el prefijo de los archivos de salida. "`--itype proteins`" especifica que los datos de entrada son secuencias de aminoácidos. "`--excel`" genera adicionalmente el reporte de anotación en una hoja de cálculo .xlsx. "`-m diamond`" indica que se utilice el algoritmo DIAMOND para realizar la búsqueda rápida de homología. "`--query_cover 50`" exige que el alineamiento cubra como mínimo el 50% de la secuencia consultada. "`--evalue 1e-5`" establece el umbral estadístico de valor E máximo aceptado. "`--report_orthologs`" solicita que se incluya la lista detallada de genes ortólogos detectados. "`--go_evidence all`" incluye todos los códigos de evidencia de Ontología Génica (GO), y "`--cpu 10`" asigna 10 núcleos de procesamiento:
+
 ### eggnog-mapper parameters
 emapper.py -i Augustus/Polished_canu_HortaeMedusa_neurospora3.aa -o eggmapper_out --itype proteins --excel -m diamond --query_cover 50 --evalue 1e-5 --report_orthologs --go_evidence all --cpu 10
 
-Predicción de ARN ribosomal (ARNr) con Barrnap:
-Con "barrnap" se localizan los genes de ARNr en el genoma. "--kingdom euk" ajusta los modelos de búsqueda para organismos eucariotas (subunidades 5S, 5.8S, 18S y 28S). "--threads 10" utiliza 10 hilos de CPU. "--incseq" adjunta las secuencias FASTA encontradas al final del archivo GFF3 de salida. "--outseq rRNA_MP4hits.fasta" guarda las secuencias de ARNr predichas en un archivo FASTA separado. "Spades/scaffolds.fasta" indica el genoma de entrada, y "> MP4_rRNA.gff3" redirige la tabla de coordenadas al archivo GFF3:
+#### Predicción de ARN ribosomal (ARNr) con Barrnap:
+Con "`barrnap`" se localizan los genes de ARNr en el genoma. "`--kingdom euk`" ajusta los modelos de búsqueda para organismos eucariotas (subunidades 5S, 5.8S, 18S y 28S). "`--threads 10`" utiliza 10 hilos de CPU. "`--incseq`" adjunta las secuencias FASTA encontradas al final del archivo GFF3 de salida. "`--outseq rRNA_MP4hits.fasta`" guarda las secuencias de ARNr predichas en un archivo FASTA separado. "`Spades/scaffolds.fasta`" indica el genoma de entrada, y "`> MP4_rRNA.gff3`" redirige la tabla de coordenadas al archivo GFF3:
+
 ### barrnap v.0.9 parameters
 barrnap --kingdom euk --threads 10 --incseq --outseq rRNA_MP4hits.fasta Spades/scaffolds.fasta > MP4_rRNA.gff3
 
-Predicción de ARN de transferencia (ARNt) con tRNAscan-SE:
-El comando "tRNAscan-SE" busca genes de ARNt a lo largo del ensamblaje. "-E" configura el programa para buscar ARNt citoplasmáticos eucariotas. "-I" activa el motor de búsqueda basado en modelos de covarianza de Infernal para mayor precisión. "-o MP4_tRNAscan.out" define el archivo tabular donde se guardará la lista de ARNt detectados. "--stats MP4_tRNAscan_stats.txt" genera un resumen estadístico global (total de ARNt, intrones, pseudogenes, etc.). "-b MP4_tRNAscan.bed" exporta las coordenadas genómicas en formato BED, y "Spades/scaffolds.fasta" indica el archivo de entrada:
+#### Predicción de ARN de transferencia (ARNt) con tRNAscan-SE:
+El comando "`tRNAscan-SE`" busca genes de ARNt a lo largo del ensamblaje. "`-E`" configura el programa para buscar ARNt citoplasmáticos eucariotas. "`-I`" activa el motor de búsqueda basado en modelos de covarianza de Infernal para mayor precisión. "`-o MP4_tRNAscan.out`" define el archivo tabular donde se guardará la lista de ARNt detectados. "`--stats MP4_tRNAscan_stats.txt`" genera un resumen estadístico global (total de ARNt, intrones, pseudogenes, etc.). "`-b MP4_tRNAscan.bed`" exporta las coordenadas genómicas en formato BED, y "`Spades/scaffolds.fasta`" indica el archivo de entrada:
+
 ### tRNAscan parameters
 tRNAscan-SE -E -I -o MP4_tRNAscan.out --stats MP4_tRNAscan_stats.txt -b MP4_tRNAscan.bed Spades/scaffolds.fasta
 
-Conteo de enzimas CAZymes ( filtrado de resultados de dbCAN):
-Estas dos líneas en lenguaje awk permiten filtrar y contar los resultados descargados del servidor web dbCAN ("CAZyme.txt").
- * En la primera línea, "awk '$5 != "N"{print $1,$5}' CAZyme.txt" revisa que la columna 5 no sea "N" (negativo) e imprime únicamente el identificador del gen (columna 1) y la familia predicha (columna 5); luego "| sort -u" ordena la lista y elimina duplicados.
- * En la segunda línea, "awk '$6 ~ /^Y.*/ {print $0}' CAZyme.txt" filtra todas las filas cuya columna 6 empiece con la letra "Y" (Yes, indicando confirmación positiva), y "| wc -l" (word count - lines) cuenta el número total de líneas para saber cuántas CAZymes fueron confirmadas:
+#### Conteo de enzimas CAZymes ( filtrado de resultados de dbCAN):
+Estas dos líneas en lenguaje awk permiten filtrar y contar los resultados descargados del servidor web dbCAN ("`CAZyme.txt`").
+ * En la primera línea, "`awk '$5 != "N"{print $1,$5}' CAZyme.txt`" revisa que la columna 5 no sea "`N`" (negativo) e imprime únicamente el identificador del gen (columna 1) y la familia predicha (columna 5); luego "`| sort -u`" ordena la lista y elimina duplicados.
+ * En la segunda línea, "`awk '$6 ~ /^Y.*/ {print $0}' CAZyme.txt`" filtra todas las filas cuya columna 6 empiece con la letra "`Y`" (Yes, indicando confirmación positiva), y "`| wc -l`" (word count - lines) cuenta el número total de líneas para saber cuántas CAZymes fueron confirmadas:
+
 #### To count Cazymes output from dbSCAN server
 awk '$5 != "N"{print $1,$5}' CAZyme.txt | sort -u
 awk '$6 ~ /^Y.*/ {print $0}' CAZyme.txt | wc -l
