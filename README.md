@@ -31,7 +31,7 @@ A lo largo de este flujo de trabajo se manejan los siguientes formatos estándar
 Antes de iniciar el control de calidad, si el centro de secuenciación entregó las lecturas divididas en diferentes carriles (lanes, por ejemplo L1 y L2), es necesario unirlas en un único archivo para las lecturas forward (_1) y otro para las lecturas reverse (_2).
 
 #### Unir los archivos de lecturas:
-El comando "cat" (concatenate) lee múltiples archivos de forma secuencial y une su contenido. En la primera línea, toma los archivos correspondientes a las lecturas hacia adelante ("MA15_L1_1.fq.gz" y "MA15_L2_1.fq.gz") y, mediante el operador ">", redirige y guarda la unión en un nuevo archivo llamado "MA15_1_merged.fq.gz". En la segunda línea ocurre exactamente lo mismo, pero uniendo las lecturas en sentido inverso ("_2") dentro del archivo "MA15_2_merged.fq.gz":
+El comando "`cat`" (concatenate) lee múltiples archivos de forma secuencial y une su contenido. En la primera línea, toma los archivos correspondientes a las lecturas hacia adelante ("MA15_L1_1.fq.gz" y "MA15_L2_1.fq.gz") y, mediante el operador ">", redirige y guarda la unión en un nuevo archivo llamado "MA15_1_merged.fq.gz". En la segunda línea ocurre exactamente lo mismo, pero uniendo las lecturas en sentido inverso ("_2") dentro del archivo "MA15_2_merged.fq.gz":
 #### Para las lecturas forward (_1):
 cat MA15_L1_1.fq.gz MA15_L2_1.fq.gz > MA15_1_merged.fq.gz
 
@@ -44,7 +44,7 @@ cat MA15_L1_2.fq.gz MA15_L2_2.fq.gz > MA15_2_merged.fq.gz
 Mediante TrimGalore se realiza la limpieza inicial de las secuencias crudas, eliminando adaptadores remanentes de la secuenciación y recortando los extremos con baja calidad antes de ensamblar.
 
 #### Configuración del supercomputador (SLURM):
-Los comandos "#!/bin/bash" y "#SBATCH" le indican al supercomputador las instrucciones que debe seguir al procesar el script. En este caso, "#!/bin/bash" define el lenguaje de terminal en el que se debe leer el código; "--job-name=Trimgalore" le asigna el nombre al trabajo en la cola; "--output=Reads_trim" indica el nombre del archivo de texto donde se guardará el registro (log) de salida; "--ntasks=1" especifica la cantidad de tareas o procesos simultáneos; "--time=164:00:00" establece el tiempo máximo de ejecución (164 horas); y "--partition=dribe-long" indica el grupo de nodos que se debe utilizar:
+Los comandos "`#!/bin/bash`" y "`#SBATCH`" le indican al supercomputador las instrucciones que debe seguir al procesar el script. En este caso, "`#!/bin/bash`" define el lenguaje de terminal en el que se debe leer el código; "`--job-name=Trimgalore`" le asigna el nombre al trabajo en la cola; "`--output=Reads_trim`" indica el nombre del archivo de texto donde se guardará el registro (log) de salida; "`--ntasks=1`" especifica la cantidad de tareas o procesos simultáneos; "`--time=164:00:00`" establece el tiempo máximo de ejecución (164 horas); y "`--partition=dribe-long`" indica el grupo de nodos que se debe utilizar:
 
 #!/bin/bash
 #SBATCH --job-name=Trimgalore
@@ -54,9 +54,9 @@ Los comandos "#!/bin/bash" y "#SBATCH" le indican al supercomputador las instruc
 #SBATCH --partition=dribe-long 
 
 #### Cargar módulos necesarios y ejecutar recorte por defecto (Default):
-El comando "module load" activa en el entorno del servidor los programas requeridos: "TrimGalore/0.4.3", "cutadapt/Python3.5-1.9.1" (herramienta interna que usa TrimGalore para cortar adaptadores) y "fastqc/0.11.9" (para generar reportes visuales de calidad).
+El comando "`module load`" activa en el entorno del servidor los programas requeridos: "TrimGalore/0.4.3", "cutadapt/Python3.5-1.9.1" (herramienta interna que usa TrimGalore para cortar adaptadores) y "fastqc/0.11.9" (para generar reportes visuales de calidad).
 
-En la línea de ejecución, "trim_galore" inicia el programa. "--paired" indica que se están procesando lecturas emparejadas (forward y reverse, en este ejemplo "MA9A_merged_1.fq.gz" y "MA9A_merged_2.fq.gz", o bien "MA15_1_merged.fq.gz" y "MA15_2_merged.fq.gz" según la muestra). "--fastqc" instruye al programa para que ejecute automáticamente un análisis de FastQC una vez finalizado el recorte, y "-o FASTQC/" define el directorio de salida donde se guardarán las secuencias limpias y los reportes:
+En la línea de ejecución, "`trim_galore`" inicia el programa. "`--paired`" indica que se están procesando lecturas emparejadas (forward y reverse, en este ejemplo "MA9A_merged_1.fq.gz" y "MA9A_merged_2.fq.gz", o bien "MA15_1_merged.fq.gz" y "MA15_2_merged.fq.gz" según la muestra). "`--fastqc`" instruye al programa para que ejecute automáticamente un análisis de FastQC una vez finalizado el recorte, y "`-o FASTQC/`" define el directorio de salida donde se guardarán las secuencias limpias y los reportes:
 
 module load TrimGalore/0.4.3
 module load cutadapt/Python3.5-1.9.1
@@ -67,7 +67,7 @@ trim_galore --paired MA9A_merged_1.fq.gz MA9A_merged_2.fq.gz --fastqc -o FASTQC/
 #### Ejecutar recorte con valores específicos:
 Si al revisar las gráficas de calidad de FastQC se observa ruido al inicio de las lecturas, se puede repetir el trabajo indicando cuántos nucleótidos exactos recortar.
 
-En las siguientes líneas se mantiene la misma estructura de SLURM y carga de módulos, pero en el comando "trim_galore" se agregan los parámetros "--clip_R1 5" para cortar 5 bases del extremo 5' de las lecturas forward ("MP4_MERGED_val_1.fq.gz") y "--clip_R2 15" o "--clip_R2 10" para cortar 15 o 10 bases del extremo 5' de las lecturas reverse ("MP4_MERGED_val_2.fq.gz"), dependiendo de lo observado en las gráficas de calidad:
+En las siguientes líneas se mantiene la misma estructura de SLURM y carga de módulos, pero en el comando "`trim_galore`" se agregan los parámetros "`--clip_R1 5`" para cortar 5 bases del extremo 5' de las lecturas forward ("MP4_MERGED_val_1.fq.gz") y "`--clip_R2 15`" o "`--clip_R2 10`" para cortar 15 o 10 bases del extremo 5' de las lecturas reverse ("MP4_MERGED_val_2.fq.gz"), dependiendo de lo observado en las gráficas de calidad:
 
 #!/bin/bash
 #SBATCH --job-name=Trimgalore
